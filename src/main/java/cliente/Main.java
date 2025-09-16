@@ -10,7 +10,7 @@ public class Main {
     private static Scanner scanner = new Scanner(System.in);
     
     public static void main(String[] args) {
-        System.out.println("BEM-VINDO AO SISTEMA DE TODOLIST");
+        System.out.println("---Gerenciador de Tarefas---");
         boolean continuar = true;
         
         while (continuar) {
@@ -38,7 +38,7 @@ public class Main {
                     break;
                 case 0:
                     continuar = false;
-                    System.out.println("\nObrigado por usar o TodoList! Até logo!");
+                    System.out.println("\nObrigado por usar o Gerenciador.");
                     break;
                 default:
                     System.out.println("\nOpção inválida! Tente novamente.");
