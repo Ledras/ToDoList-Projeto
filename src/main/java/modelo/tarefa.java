@@ -47,4 +47,55 @@ public class Tarefa {
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
+    public String getDescricao() {
+        return descricao;
+    }
+    
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+    
+    public boolean isCompleta() {
+        return completa;
+    }
+    
+    public void setCompleta(boolean completa) {
+        this.completa = completa;
+    }
+    
+    public LocalDateTime getDataAgora() {
+        return dataAgora;
+    }
+    
+    public void setDataAgora(LocalDateTime dataAgora) {
+        this.dataAgora = dataAgora;
+    }
+    
+    public String getPrioridade() {
+        return prioridade;
+    }
+    
+    public void setPrioridade(String prioridade) {
+        this.prioridade = prioridade;
+    }
+    
+    public String getDataFormatada() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return dataAgora.format(formatter);
+    }
+    
+    @Override
+    public String toString() {
+        String status = completa ? "Concluido" : "Pendente";
+        String icone = completa ? "✓" : "○";
+        return String.format("ID: %d | %s %s | Prioridade: %s\nTítulo: %s\nDescrição: %s\nData: %s\n%s", 
+                           id, status, icone, prioridade, titulo, descricao, getDataFormatada(),
+                           "─".repeat(60));
+    }
+    
+    public String toStringResumo() {
+        String status = completa ? "✓" : "○";
+        return String.format("%d. %s %s - %s", id, status, titulo, prioridade);
+    }
+}
     
