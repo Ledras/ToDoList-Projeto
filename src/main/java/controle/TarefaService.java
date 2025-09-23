@@ -10,3 +10,9 @@ public class TarefaService {
         tarefas.add(novaTarefa);
         return novaTarefa;
     }
+    
+    public Tarefa criar(String titulo, String descricao, String prioridade) {
+        Tarefa novaTarefa = new Tarefa(id++, titulo, descricao, false, prioridade);
+        tarefas.add(novaTarefa);
+        return novaTarefa;
+    }
