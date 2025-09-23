@@ -16,3 +16,18 @@ public class TarefaService {
         tarefas.add(novaTarefa);
         return novaTarefa;
     }
+    
+     public List<Tarefa> listar() {
+        return tarefas;
+    }
+
+    public boolean atualizar(Long id, String novoTitulo, String novaDescricao) {
+        for (Tarefa tarefa : tarefas) {
+            if (tarefa.getId().equals(id)) {
+                tarefa.setTitulo(novoTitulo);
+                tarefa.setDescricao(novaDescricao);
+                return true;
+            }
+        }
+        return false;
+    }
