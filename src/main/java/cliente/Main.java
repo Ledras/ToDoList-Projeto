@@ -1,221 +1,195 @@
-package cliente;
-
-import modelo.Tarefas;
-import servico.ControleTarefas;
+import java.util.List;
 import java.util.Scanner;
 
-//Classe Principal
 public class Main {
-    private static ControleTarefas tarefasControl = new ControleTarefas();
-    private static Scanner scanner = new Scanner(System.in);
+    private static TarefaService service = new TarefaService();
+    private static Scanner sc = new Scanner(System.in);
     
     public static void main(String[] args) {
-        System.out.println("---Gerenciador de Tarefas---");
-        boolean continuar = true;
+        System.out.println("=== TODOLIST ===");
         
-        while (continuar) {
-            exibirMenu();
-            int opcao = lerOpcao();
+        while (true) {
+            mostrarMenu();
+            int opcao = lerInt();
             
             switch (opcao) {
-                case 1:
-                    adicionarTarefa();
-                    break;
-                case 2:
-                    listarTodasTarefas();
-                    break;
-                case 3:
-                    listarTarefasPendentes();
-                    break;
-                case 4:
-                    marcarTarefaComoConcluida();
-                    break;
-                case 5:
-                    deletarTarefa();
-                    break;
-                case 6:
-                    exibirEstatisticas();
-                    break;
-                case 0:
-                    continuar = false;
-                    System.out.println("\nObrigado por usar o Gerenciador.");
-                    break;
-                default:
-                    System.out.println("\nOpção inválida! Tente novamente.");
+                case 1 -> cadastrar();
+                case 2 -> listar();
+                case 3 -> editar();
+                case 4 -> concluir();
+                case 5 -> excluir();
+                case 6 -> listarConcluidas();
+                case 7 -> buscar();
+                case 0 -> {
+                    System.out.println("Até logo!");
+                    sc.close();
+                    return;
+                }
+                default -> System.out.println("Opção inválida!");
             }
-            
-            if (continuar) {
-                System.out.println("\nPressione ENTER para continuar...");
-                scanner.nextLine();
-            }
+            pausar();
         }
-        
-        scanner.close();
     }
     
-    // Exibe o menu principal
-    private static void exibirMenu() {
-        System.out.println("\n=== MENU PRINCIPAL ===");
-        System.out.println("1. Adicionar Nova Tarefa");
-        System.out.println("2. Listar Todas as Tarefas");
-        System.out.println("3. Listar Tarefas Pendentes");
-        System.out.println("4. Marcar Tarefa como Concluída");
-        System.out.println("5. Deletar Tarefa");
-        System.out.println("6. Exibir Estatísticas");
-        System.out.println("0. Sair");
-        System.out.print("\nEscolha uma opção: ");
+    private static void mostrarMenu() {
+        System.out.println("\n1. Cadastrar  2. Listar  3. Editar  4. Concluir");
+        System.out.println("5. Excluir  6. Concluídas  7. Buscar  0. Sair");
+        System.out.printf("Total: %d | Pendentes: %d | Concluídas: %d\n", 
+            service.contarTarefas(), service.contarTarefasPendentes(), service.contarTarefasConcluidas());
+        System.out.print("Opção: ");
     }
     
-    // Lê a opção do usuário
-    private static int lerOpcao() {
+    private static int lerInt() {
         try {
-            int opcao = Integer.parseInt(scanner.nextLine());
-            return opcao;
+            return Integer.parseInt(sc.nextLine());
         } catch (NumberFormatException e) {
             return -1;
         }
     }
     
-    // Adiciona uma nova tarefa
-    private static void adicionarTarefa() {
-        System.out.println("\n=== ADICIONAR NOVA TAREFA ===");
+    private static void pausar() {
+        System.out.print("\nPressione Enter...");
+        sc.nextLine();
+    }
+    
+    private static void cadastrar() {
+        System.out.print("\nTítulo: ");
+        String titulo = sc.nextLine().trim();
+        if (titulo.isEmpty()) {
+            System.out.println("Título obrigatório!");
+            return;
+        }
         
-        System.out.print("Digite a descrição da tarefa: ");
-        String descricao = scanner.nextLine().trim();
-        
+        System.out.print("Descrição: ");
+        String descricao = sc.nextLine().trim();
         if (descricao.isEmpty()) {
-            System.out.println("Erro: A descrição não pode estar vazia!");
+            System.out.println("Descrição obrigatória!");
             return;
         }
         
-        System.out.println("\nEscolha a prioridade:");
-        System.out.println("1. Alta");
-        System.out.println("2. Média");
-        System.out.println("3. Baixa");
-        System.out.print("Opção: ");
+        System.out.print("Prioridade (1-Alta, 2-Média, 3-Baixa): ");
+        String[] prioridades = {"MEDIA", "ALTA", "MEDIA", "BAIXA"};
+        int p = lerInt();
+        String prioridade = (p >= 1 && p <= 3) ? prioridades[p] : "MEDIA";
         
-        String prioridade;
-        int opcaoPrioridade = lerOpcao();
-        
-        switch (opcaoPrioridade) {
-            case 1:
-                prioridade = "Alta";
-                break;
-            case 2:
-                prioridade = "Média";
-                break;
-            case 3:
-                prioridade = "Baixa";
-                break;
-            default:
-                prioridade = "Média";
-                System.out.println("Prioridade inválida. Definindo como 'Média'.");
-        }
-        
-        Tarefas novaTarefa = tarefasControl.armazenarTarefa(descricao, prioridade);
-        System.out.println("\n✓ Tarefa adicionada com sucesso!");
-        System.out.println("ID: " + novaTarefa.getId() + " | Descrição: " + novaTarefa.getDescricao() + " | Prioridade: " + novaTarefa.getPrioridade());
+        Tarefa tarefa = service.criar(titulo, descricao, prioridade);
+        System.out.println("Tarefa criada: " + tarefa.getId());
     }
     
-    // Lista todas as tarefas
-    private static void listarTodasTarefas() {
-        tarefasControl.apresentarTarefas();
-    }
-    
-    // Lista apenas as tarefas pendentes
-    private static void listarTarefasPendentes() {
-        tarefasControl.apresentarTarefasPendentes();
-    }
-    
-    // Marca uma tarefa como concluída
-    private static void marcarTarefaComoConcluida() {
-        System.out.println("\n=== MARCAR TAREFA COMO CONCLUÍDA ===");
-        
-        if (tarefasControl.getTarefasPendentes() == 0) {
-            System.out.println("Não há tarefas pendentes para marcar como concluídas!");
+    private static void listar() {
+        List<Tarefa> tarefas = service.listar();
+        if (tarefas.isEmpty()) {
+            System.out.println("\nNenhuma tarefa encontrada.");
             return;
         }
+        System.out.println();
+        tarefas.forEach(System.out::println);
+    }
+    
+    private static void editar() {
+        mostrarResumo();
+        System.out.print("\nID para editar: ");
+        Long id = (long) lerInt();
         
-        tarefasControl.apresentarTarefasPendentes();
-        
-        System.out.print("\nDigite o ID da tarefa a ser marcada como concluída: ");
-        int id = lerOpcao();
-        
-        if (id <= 0) {
-            System.out.println("ID inválido!");
-            return;
-        }
-        
-        Tarefas tarefa = tarefasControl.buscarTarefaPorId(id);
+        Tarefa tarefa = service.pesquisar(id);
         if (tarefa == null) {
-            System.out.println("Tarefa com ID " + id + " não encontrada!");
+            System.out.println("Tarefa não encontrada!");
             return;
         }
         
-        if (tarefa.isConcluida()) {
-            System.out.println("Esta tarefa já está concluída!");
-            return;
-        }
+        System.out.print("Novo título (" + tarefa.getTitulo() + "): ");
+        String titulo = sc.nextLine().trim();
+        if (titulo.isEmpty()) titulo = tarefa.getTitulo();
         
-        if (tarefasControl.marcarComoConcluida(id)) {
-            System.out.println("\n✓ Tarefa marcada como concluída com sucesso!");
-            System.out.println("Tarefa: " + tarefa.getDescricao());
+        System.out.print("Nova descrição (" + tarefa.getDescricao() + "): ");
+        String descricao = sc.nextLine().trim();
+        if (descricao.isEmpty()) descricao = tarefa.getDescricao();
+        
+        if (service.atualizar(id, titulo, descricao)) {
+            System.out.println("Tarefa atualizada!");
         } else {
-            System.out.println("Erro ao marcar tarefa como concluída!");
+            System.out.println("Erro ao atualizar!");
         }
     }
     
-    // Deleta uma tarefa
-    private static void deletarTarefa() {
-        System.out.println("\n=== DELETAR TAREFA ===");
+    private static void concluir() {
+        mostrarResumo();
+        System.out.print("\nID para concluir: ");
+        Long id = (long) lerInt();
         
-        if (tarefasControl.getTotalTarefas() == 0) {
-            System.out.println("Não há tarefas para deletar!");
-            return;
-        }
-        
-        tarefasControl.apresentarTarefas();
-        
-        System.out.print("\nDigite o ID da tarefa a ser deletada: ");
-        int id = lerOpcao();
-        
-        if (id <= 0) {
-            System.out.println("ID inválido!");
-            return;
-        }
-        
-        Tarefas tarefa = tarefasControl.buscarTarefaPorId(id);
+        Tarefa tarefa = service.pesquisar(id);
         if (tarefa == null) {
-            System.out.println("Tarefa com ID " + id + " não encontrada!");
+            System.out.println("Tarefa não encontrada!");
             return;
         }
         
-        System.out.println("\nTarefa a ser deletada:");
-        System.out.println(tarefa.toString());
-        System.out.print("\nTem certeza que deseja deletar esta tarefa? (s/n): ");
-        String confirmacao = scanner.nextLine().trim().toLowerCase();
+        if (tarefa.isCompleta()) {
+            System.out.println("Já está concluída!");
+            return;
+        }
         
-        if (confirmacao.equals("s") || confirmacao.equals("sim")) {
-            if (tarefasControl.deletarTarefa(id)) {
-                System.out.println("\n✓ Tarefa deletada com sucesso!");
+        if (service.marcar(id)) {
+            System.out.println("Tarefa concluída!");
+        } else {
+            System.out.println("Erro ao concluir!");
+        }
+    }
+    
+    private static void excluir() {
+        mostrarResumo();
+        System.out.print("\nID para excluir: ");
+        Long id = (long) lerInt();
+        
+        Tarefa tarefa = service.pesquisar(id);
+        if (tarefa == null) {
+            System.out.println("Tarefa não encontrada!");
+            return;
+        }
+        
+        System.out.println(tarefa.toStringResumo());
+        System.out.print("Confirmar exclusão? (s/N): ");
+        String resp = sc.nextLine().trim().toLowerCase();
+        
+        if (resp.equals("s") || resp.equals("sim")) {
+            if (service.remover(id)) {
+                System.out.println("Tarefa excluída!");
             } else {
-                System.out.println("Erro ao deletar tarefa!");
+                System.out.println("Erro ao excluir!");
             }
         } else {
-            System.out.println("Operação cancelada.");
+            System.out.println("Cancelado.");
         }
     }
     
-    // Exibe estatísticas das tarefas
-    private static void exibirEstatisticas() {
-        System.out.println("\n=== ESTATÍSTICAS ===");
-        System.out.println("Total de tarefas: " + tarefasControl.getTotalTarefas());
-        System.out.println("Tarefas pendentes: " + tarefasControl.getTarefasPendentes());
-        System.out.println("Tarefas concluídas: " + tarefasControl.getTarefasConcluidas());
-        
-        if (tarefasControl.getTotalTarefas() > 0) {
-            double percentualConcluido = (double) tarefasControl.getTarefasConcluidas() / tarefasControl.getTotalTarefas() * 100;
-            System.out.printf("Percentual de conclusão: %.1f%%\n", percentualConcluido);
+    private static void listarConcluidas() {
+        List<Tarefa> concluidas = service.listarCompletas();
+        if (concluidas.isEmpty()) {
+            System.out.println("\nNenhuma tarefa concluída.");
+            return;
         }
+        System.out.println();
+        concluidas.forEach(System.out::println);
+    }
+    
+    private static void buscar() {
+        System.out.print("\nID da tarefa: ");
+        Long id = (long) lerInt();
+        
+        Tarefa tarefa = service.pesquisar(id);
+        if (tarefa != null) {
+            System.out.println(tarefa);
+        } else {
+            System.out.println("Tarefa não encontrada!");
+        }
+    }
+    
+    private static void mostrarResumo() {
+        List<Tarefa> tarefas = service.listar();
+        if (tarefas.isEmpty()) {
+            System.out.println("\nNenhuma tarefa disponível.");
+            return;
+        }
+        System.out.println();
+        tarefas.forEach(t -> System.out.println(t.toStringResumo()));
     }
 }
