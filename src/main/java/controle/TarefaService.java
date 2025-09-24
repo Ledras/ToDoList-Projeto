@@ -41,4 +41,45 @@ public class TarefaService {
         }
         return false;
     }
+public boolean marcar(Long id) {
+        for (Tarefa tarefa : tarefas) {
+            if (tarefa.getId().equals(id)) {
+                tarefa.setCompleta(true);
+                return true;
+            }
+        }
+        return false;
+    }
 
+    public Tarefa pesquisar(Long id) {
+        for (Tarefa tarefa : tarefas) {
+            if (tarefa.getId().equals(id)) {
+                return tarefa;
+            }
+        }
+        return null;
+    }
+
+    public List<Tarefa> listarCompletas() {
+        List<Tarefa> tarefasCompletas = new ArrayList<>();
+
+        for (Tarefa tarefa : tarefas) {
+            if (tarefa.isCompleta() == true) {
+                tarefasCompletas.add(tarefa);
+            }
+        }
+        return tarefasCompletas;
+    }
+    
+    public int contarTarefas() {
+        return tarefas.size();
+    }
+    
+    public int contarTarefasConcluidas() {
+        return listarCompletas().size();
+    }
+    
+    public int contarTarefasPendentes() {
+        return contarTarefas() - contarTarefasConcluidas();
+    }
+}
